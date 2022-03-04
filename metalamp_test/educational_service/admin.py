@@ -1,7 +1,6 @@
 from django.contrib import admin
+
 from educational_service.models import *
-
-
 
 
 class AmdinAnswer(admin.StackedInline):

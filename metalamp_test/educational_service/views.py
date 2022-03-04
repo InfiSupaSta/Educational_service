@@ -1,11 +1,15 @@
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.views import LoginView
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 
-from django.views.generic import ListView
+from django.views.generic import ListView, CreateView
+
+from educational_service.forms import UserRegistrationForm, UserLogInForm
 from educational_service.utils import Mixin
 from educational_service.utils import menu
-from educational_service.models import Theme
+from educational_service.models import *
 
 
 def get_context():
@@ -35,16 +39,30 @@ class Tests(Mixin, ListView):
         return Theme.objects.all()
 
 
+# class ThemeQuestions(Mixin, ListView):
+#     template_name = 'educational_service/test.html'
+#
+#     def get_context_data(self, *, object_list=None, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         datamixin_context = self.get_user_context()
+#         return context | datamixin_context
+#
+#     def post(self):
+#         pass
+
+
 def theme_questions(request, pk):
     current_theme = Theme.objects.get(pk=pk)
 
     context = {
         'title': 'Текущие вопросы',
         'menu': menu,
+        'questions': Question.objects.filter(theme=pk),
+        'answers': Answer.objects.all(),
         'current_theme': current_theme,
     }
 
-    return render(request, r'educational_service/test.html', context)
+    return render(request, 'educational_service/test.html', context)
 
 
 # def theme_test(request, theme_id):
@@ -56,6 +74,7 @@ def theme_test(request):
     return reverse(request.GET)
     # return render(request, 'educational_service/test.html', context=context)
     # return HttpResponse(f'{rev}')
+
 
 # class MainPage(Mixin, TemplateView):
 #
@@ -72,3 +91,28 @@ def theme_test(request):
 #
 #         print(context | datamixin_context)
 #         return context | datamixin_context
+
+class UserRegistration(Mixin, CreateView):
+    form_class = UserRegistrationForm
+    template_name = 'educational_service/registration.html'
+    success_url = reverse_lazy('home')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        datamixin_context = self.get_user_context(title='Регистрация')
+        return context | datamixin_context
+
+
+class UserLogin(Mixin, LoginView):
+    form_class = AuthenticationForm
+    template_name = 'educational_service/login.html'
+    success_url = reverse_lazy('home')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        datamixin_context = self.get_user_context(title='Авторизация')
+
+        return context | datamixin_context
+
+    def get_success_url(self):
+        return reverse_lazy('home')

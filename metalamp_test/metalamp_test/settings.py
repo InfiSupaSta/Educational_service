@@ -36,7 +36,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'educational_service.apps.EducationalServiceConfig',
+    'authentication.apps.AuthenticationConfig',
+    'django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig',
 ]
 
 MIDDLEWARE = [
@@ -128,3 +131,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'educational_service.UserProfile'

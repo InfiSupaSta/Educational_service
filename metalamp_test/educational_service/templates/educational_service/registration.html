@@ -1,0 +1,29 @@
+{% extends 'educational_service/main_page.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация</title>
+</head>
+<body>
+{% block content %}
+    <br><br>
+
+<form method="POST" class="registration-form">
+    {% csrf_token %}
+
+    {% for field in form %}
+    <p class = 'form-label'><label> {{ field.label }}</label> {{ field }} </p>
+    <div class = 'form-field-error'> {{ field.errors }} </div>
+    <hr>
+    {% endfor %}
+
+    <button type="SUBMIT">Регистрация</button>
+</form>
+
+
+{% endblock content %}
+
+
+</body>
+</html>

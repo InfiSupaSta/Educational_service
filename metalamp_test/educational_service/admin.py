@@ -9,7 +9,7 @@ class AmdinAnswer(admin.StackedInline):
 
 class AdminQuestion(admin.ModelAdmin):
     inlines = [AmdinAnswer]
-    list_display = ('theme', 'question',)
+    list_display = ('theme', 'question')
 
 
 # admin.site.register(WrongAnswer)

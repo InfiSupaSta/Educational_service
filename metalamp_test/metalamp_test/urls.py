@@ -22,9 +22,13 @@ urlpatterns = [
     path('', main_page, name='home'),
     # path('tests/', tests, name='tests'),
     path('tests/', Tests.as_view(), name='tests'),
+
     path('tests/<int:pk>', theme_questions, name='test'),
+    # path('tests/<int:pk>', ThemeQuestions.as_view(), name='test'),
+
     path('api/v1', main_page, name='api'),
     path('registration', UserRegistration.as_view(), name='register'),
     path('login', UserLogin.as_view(), name='login'),
+    path('logout', user_logout, name='logout'),
     # path('hello/2', MainPage.as_view(), name='main_page2')
 ]

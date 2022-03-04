@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'educational_service.apps.EducationalServiceConfig',
-    'authentication.apps.AuthenticationConfig',
+    # 'authentication.apps.AuthenticationConfig',
     'django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig',
 ]
 

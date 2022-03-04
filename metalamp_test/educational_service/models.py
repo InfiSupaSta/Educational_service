@@ -35,7 +35,6 @@ class UserProfileManager(BaseUserManager):
 
 
 class UserProfile(AbstractBaseUser, PermissionsMixin):
-    """ Database model for users in the system """
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
     is_staff = models.BooleanField(default=False)
@@ -46,7 +45,6 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['name']
 
     def __str__(self):
-        """ Return string representation of our user """
         return self.email
 
 
@@ -56,7 +54,7 @@ class Theme(models.Model):
     description = models.TextField()
 
     def __str__(self):
-        return self.title
+        return self.title.__str__()
 
     def get_absolute_url(self):
         return reverse('test', kwargs={'pk': self.pk})
@@ -72,7 +70,7 @@ class Question(models.Model):
     question = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.question
+        return self.question.__str__()
 
     class Meta:
         verbose_name = 'Вопрос'
@@ -84,11 +82,14 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     answer = models.CharField(max_length=200)
 
-    def __str__(self):
+    def __repr__(self):
         return self.question
 
 
 class QuizComplitionInfo(models.Model):
-    bound_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    objects = models.Manager()
+    # bound_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    # bound_user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    bound_user = models.IntegerField()
     theme = models.ForeignKey(Theme, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)

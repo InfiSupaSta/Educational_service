@@ -1,0 +1,20 @@
+{% extends 'educational_service/main_page.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+
+
+{% block content %}
+
+{% for item in object_list %}
+    <br><br> {{ item }} <br>
+<a href='{{ item.get_absolute_url}}'> Перейти к выполнению задач по теме! </a>
+{% endfor %}
+
+{% endblock content %}
+</body>
+</html>

@@ -1,0 +1,30 @@
+{% extends 'educational_service/main_page.html' %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+</head>
+<body>
+{% block content %}
+<br><br><br> Тема: <br><br>
+{{ current_theme }} <br><br><br><br>
+
+<form method="POST">
+    {% csrf_token %}
+    Вопрос:<br>
+    <strong>{{question}}</strong>
+    <hr>
+    {% for answer in answers %}
+    {% if question.id == answer.question_id %}
+    <br> <input type="checkbox" name="check" value="{{ answer.id }}"> {{ answer.answer }}
+    {% endif %}
+    {{ queryset_len }}
+    {% endfor %}
+    <br><button type="submit"> Ответить </button>
+</form>
+<hr>
+    {% endblock %}
+</body>
+</html>

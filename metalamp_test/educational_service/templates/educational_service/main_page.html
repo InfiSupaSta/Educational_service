@@ -9,12 +9,20 @@
 {% if user.is_authenticated%}
 В данный момент вы находитесь на аккаунте с почтовым ящиком <strong>{{ user.email }}</strong>!<br><br>
 {% endif %}
-{% for item in menu %}
+{% if request.user.is_authenticated %}
 
-<a href="{% url item.url_name %}">{{item.title}}</a>
+    {% for item in menu|slice:'-2'%}
 
-{% endfor %}
+    <a href="{% url item.url_name %}">{{item.title}}</a>
 
+    {% endfor %}
+{% else %}
+    {% for item in menu %}
+
+    <a href="{% url item.url_name %}">{{item.title}}</a>
+
+    {% endfor %}
+{% endif %}
 {% endblock menu %}
 
 {% block content %}

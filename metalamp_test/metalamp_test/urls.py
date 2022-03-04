@@ -18,6 +18,11 @@ from django.urls import path
 from educational_service.views import *
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('hello/', main_page, name='main_page')
+    path('admin/', admin.site.urls, name='admin'),
+    path('', main_page, name='home'),
+    # path('tests/', tests, name='tests'),
+    path('tests/', Tests.as_view(), name='tests'),
+    path('tests/<int:pk>', theme_questions, name='test'),
+    path('api/v1', main_page, name='api'),
+    # path('hello/2', MainPage.as_view(), name='main_page2')
 ]

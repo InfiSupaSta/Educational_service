@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'rest_framework',
     'educational_service.apps.EducationalServiceConfig',
     # 'authentication.apps.AuthenticationConfig',
     'django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig',

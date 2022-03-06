@@ -10,7 +10,7 @@
 {% block content %}
 <br><br><br> Тема: <br><br>
 {{ current_theme }} <br><br><br><br>
-
+{{ info_about_answer }}
 <form method="POST">
     {% csrf_token %}
     Вопрос:<br>
@@ -20,11 +20,37 @@
     {% if question.id == answer.question_id %}
     <br> <input type="checkbox" name="check" value="{{ answer.id }}"> {{ answer.answer }}
     {% endif %}
-    {{ queryset_len }}
+
     {% endfor %}
+    {% if queryset_len != 0 %}
     <br><button type="submit"> Ответить </button>
+    {% endif %}
 </form>
-<hr>
-    {% endblock %}
+{% if queryset_len == 0 %}
+        {% for question in all_questions %}
+            {% for info in result_info %}
+    {% for item in right_answers %}
+                    {% if question.id == info.question_id and item.question.id == question.id %}
+                        <br>Вопрос: {{ question.question }}<br>
+                        Правильно ли вы ответили? {% if info.is_correct %} Да {% else %} Нет {% endif %} <br><br>
+                        Ваш ответ: {% for number in info.chosen_answers %}
+                                        {% for item in answers %}
+                                        {% if number == item.id %}  <br>- {{item.answer}}  {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}<br>
+                        <br>Правильный ответ: {% for number in item.list_od_answers %}
+                                        {% for item in answers %}
+                                        {% if number == item.id %}  <br>- {{item.answer}}  {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}<br><br>
+                        Комментарий: {{ item.comment }}
+                        <hr>
+                    {% endif %}
+    {% endfor %}
+            {% endfor %}
+        {% endfor %}
+{% endif %}
+
+{% endblock %}
 </body>
 </html>

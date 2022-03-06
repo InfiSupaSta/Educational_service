@@ -2,7 +2,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 
 from django.views.generic import ListView, CreateView, DetailView
@@ -34,10 +34,18 @@ class Tests(Mixin, ListView):
         context = super().get_context_data(**kwargs)
         datamixin_context = self.get_user_context()
         context['title'] = 'Тесты'
+        # context['']
         return context | datamixin_context
 
     def get_queryset(self):
-        return Theme.objects.all()
+        return Theme.objects.all().order_by('id')
+
+
+def theme_description(request, slug):
+    description = get_object_or_404(Theme, slug=slug)
+    context = get_context()
+    context['theme'] = Theme.objects.get(slug=slug)
+    return render(request, 'educational_service/theme_description.html', context=context)
 
 
 # class ThemeQuestions(Mixin, DetailView):
@@ -61,6 +69,25 @@ class Tests(Mixin, ListView):
 
 # def get_queryset(self):
 #     Question.objects.all()
+def get_staticstics(user_id, theme_id):
+    amount_of_all_questions = len(QuizComplitionInfo.objects.filter(bound_user=user_id, theme_id=theme_id))
+    amount_of_correct_questions = len(
+        QuizComplitionInfo.objects.filter(bound_user=user_id, theme_id=theme_id, is_correct=True))
+    info_to_show = f'''
+    Всего в теме под названием "{Theme.objects.get(id=theme_id)}" было {amount_of_all_questions} вопрос(а, ов), вы успешно ответили на {amount_of_correct_questions}!
+    '''
+
+    return info_to_show
+
+
+def get_result_info_for_template():
+    question = Question.objects.get()
+    right_answer = RightAsnwer.objects.get().list_of_answers
+    user_answers = QuizComplitionInfo.objects.get().chosen_answers
+    comment = RightAsnwer.objects.get().comment
+
+    return
+
 
 def theme_questions(request, pk):
     current_theme = Theme.objects.get(pk=pk)
@@ -79,9 +106,16 @@ def theme_questions(request, pk):
     context = {
         'title': 'Текущие вопросы',
         'menu': menu,
+        # 'info_about_answer': None,
+        'queryset_len': queryset_len,
         # 'question': Question.objects.filter(theme=pk).first(),
-        'question': Question.objects.filter(theme=pk)[queryset_len - 1] if queryset_len > 0 else 'Вопросов больше нет!',
+        # 'question': Question.objects.filter(theme=pk)[queryset_len - 1] if queryset_len > 0 else 'Вопросов больше нет!',
+        'question': Question.objects.filter(theme=pk)[queryset_len - 1] if queryset_len > 0 else get_staticstics(
+            request.user.id, pk),
+        'all_questions': Question.objects.filter(theme=pk),
+        'result_info': QuizComplitionInfo.objects.filter(bound_user=request.user.id, theme_id=pk),
         'answers': Answer.objects.all(),
+        'right_answers': RightAsnwer.objects.all(),
         'current_theme': current_theme,
     }
 
@@ -91,9 +125,25 @@ def theme_questions(request, pk):
         complition_info.theme = Theme.objects.get(pk=pk)
         # complition_info.question = context.get('question')
         complition_info.question = Question.objects.filter(theme=pk)[queryset_len - 1]
-        print(complition_info.bound_user)
-        print(complition_info.theme.id)
-        print(complition_info.question.id)
+        # print(complition_info.bound_user)
+        # print(complition_info.theme.id)
+        # print(complition_info.question.id)
+
+        current_answer = RightAsnwer.objects.filter(theme_id=complition_info.theme.id,
+                                                    question_id=complition_info.question.id)
+        # current_answer = QuizComplitionInfo.objects.all()
+
+        # print(current_answer.values_list()[0])
+        # print(request.POST.getlist('check'))
+        # print([item for item in current_answer.values_list()[0] if isinstance(item, list)][0])
+        if [item for item in current_answer.values_list()[0] if isinstance(item, list)][0] == [int(item) for item in
+                                                                                               request.POST.getlist(
+                                                                                                   'check')]:
+            complition_info.is_correct = True
+
+            complition_info.chosen_answers = [int(item) for item in request.POST.getlist('check')]
+        else:
+            complition_info.chosen_answers = [int(item) for item in request.POST.getlist('check')]
 
         if len(QuizComplitionInfo.objects.all()) == 0:
             complition_info.save()
@@ -126,23 +176,6 @@ def theme_test(request):
     return reverse(request.GET)
     # return render(request, 'educational_service/test.html', context=context)
     # return HttpResponse(f'{rev}')
-
-
-# class MainPage(Mixin, TemplateView):
-#
-#     template_name = 'educational_service/main_page.html'
-#
-#     def get(self, request, *args, **kwargs):
-#         context = self.get_context_data(**kwargs)
-#         return self.render_to_response(context)
-#
-#     def get_user_context(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         datamixin_context = self.get_user_context(title='Главная страница')
-#
-#
-#         print(context | datamixin_context)
-#         return context | datamixin_context
 
 
 class UserRegistration(Mixin, CreateView):

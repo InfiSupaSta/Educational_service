@@ -1,12 +1,9 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import BaseUserManager
+from django.contrib.auth.models import PermissionsMixin
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.urls import reverse
-
-from django.contrib.auth.models import AbstractBaseUser
-from django.contrib.auth.models import PermissionsMixin
-from django.contrib.auth.models import BaseUserManager
-
-from metalamp_test import settings
 
 
 class UserProfileManager(BaseUserManager):
@@ -52,12 +49,16 @@ class Theme(models.Model):
     objects = models.Manager()
     title = models.CharField(max_length=200)
     description = models.TextField()
+    slug = models.SlugField(max_length=100, unique=True, db_index=True)
 
     def __str__(self):
         return self.title.__str__()
 
     def get_absolute_url(self):
         return reverse('test', kwargs={'pk': self.pk})
+
+    def get_absolute_url_for_description(self):
+        return reverse('theme_desc', kwargs={'slug': self.slug})
 
     class Meta:
         verbose_name = 'Тема'
@@ -73,8 +74,8 @@ class Question(models.Model):
         return self.question.__str__()
 
     class Meta:
-        verbose_name = 'Вопрос'
-        verbose_name_plural = 'Вопросы'
+        verbose_name = 'Тема + вопрос'
+        verbose_name_plural = 'Темы + вопросы'
 
 
 class Answer(models.Model):
@@ -83,7 +84,7 @@ class Answer(models.Model):
     answer = models.CharField(max_length=200)
 
     def __repr__(self):
-        return self.question
+        return str(self.question)
 
 
 class QuizComplitionInfo(models.Model):
@@ -91,5 +92,27 @@ class QuizComplitionInfo(models.Model):
     # bound_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     # bound_user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     bound_user = models.IntegerField()
+    chosen_answers = ArrayField(models.IntegerField())
+    # test = models.CharField(max_length=122, default='')
+
     theme = models.ForeignKey(Theme, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    is_correct = models.BooleanField(default=False)  # new field
+
+    def __str__(self):
+        return str(self.question)
+
+
+class RightAsnwer(models.Model):  # new model
+    objects = models.Manager()
+    theme = models.ForeignKey(Theme, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    list_od_answers = ArrayField(models.IntegerField())
+    comment = models.CharField(max_length=100, default='')
+
+    def __str__(self):
+        return str(self.question)
+
+    class Meta:
+        verbose_name = 'Вопрос'
+        verbose_name_plural = 'Вопросы с правильными ответами'

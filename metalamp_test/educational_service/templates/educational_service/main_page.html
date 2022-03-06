@@ -8,6 +8,7 @@
 {% block menu %}
 {% if user.is_authenticated%}
 В данный момент вы находитесь на аккаунте с почтовым ящиком <strong>{{ user.email }}</strong>!<br><br>
+
 {% endif %}
 {% if request.user.is_authenticated %}
 

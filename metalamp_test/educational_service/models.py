@@ -6,9 +6,9 @@ from django.db import models
 from django.urls import reverse
 
 
+
 class UserProfileManager(BaseUserManager):
     def create_user(self, email, name, password=None):
-        """ Create a new user profile """
         if not email:
             raise ValueError('User must have an email address')
 
@@ -21,7 +21,6 @@ class UserProfileManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, name, password):
-        """ Create a new superuser profile """
         user = self.create_user(email, name, password)
         user.is_superuser = True
         user.is_staff = True
@@ -44,6 +43,9 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+    class Meta:
+        verbose_name = 'Инфо о пользователе'
+        verbose_name_plural = 'Инфо о пользователях'
 
 class Theme(models.Model):
     objects = models.Manager()
@@ -62,7 +64,7 @@ class Theme(models.Model):
 
     class Meta:
         verbose_name = 'Тема'
-        verbose_name_plural = 'Темы'
+        verbose_name_plural = 'Просмотр тем и создание'
 
 
 class Question(models.Model):
@@ -74,8 +76,8 @@ class Question(models.Model):
         return self.question.__str__()
 
     class Meta:
-        verbose_name = 'Тема + вопрос'
-        verbose_name_plural = 'Темы + вопросы'
+        verbose_name = 'Тема + вопрос + ответы'
+        verbose_name_plural = 'Темы + вопросы + ответы'
 
 
 class Answer(models.Model):
@@ -116,3 +118,18 @@ class RightAsnwer(models.Model):  # new model
     class Meta:
         verbose_name = 'Вопрос'
         verbose_name_plural = 'Вопросы с правильными ответами'
+
+
+class MailThemeSuccess(models.Model):
+    objects = models.Manager()
+    email = models.CharField(max_length=100)
+    theme = models.CharField(max_length=150)
+    success_percent = models.IntegerField()
+    is_mail_sended = models.BooleanField(default=False)
+
+    def __str__(self):
+        return str(self.email)
+
+    class Meta:
+        verbose_name = 'Инфо о прохождении тестов'
+        verbose_name_plural = 'Инфо о прохождении тестов'

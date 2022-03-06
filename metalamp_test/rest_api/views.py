@@ -24,7 +24,7 @@ class UserProfileRetrieveAPIView(RetrieveAPIView):
 
 
 # show single Model entry api/v1/questions
-class QuestionListAPIView(ListAPIView):
+class QuestionListAPIView(ListAPIView, CreateAPIView):
     serializer_class = QuestionSerializer
     queryset = Question.objects.all().order_by('id')
 
@@ -37,23 +37,38 @@ class QuestionRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
 # show single Model entry api/v1/right-answers
 class RightAnswerListAPIView(ListAPIView):
-    serializer_class = RightAsnwer
+    serializer_class = RightAnswerSerializer
     queryset = RightAsnwer.objects.all().order_by('id')
 
 
 # show single Model entry api/v1/right-answers/1
 class RightAnswerRetrieveUpdateAPIView(RetrieveUpdateAPIView):
-    serializer_class = RightAsnwer
+    serializer_class = RightAnswerSerializer
+    queryset = RightAsnwer.objects.all().order_by('id')
+
+
+class RightAnswerCreateListAPIView(CreateAPIView):
+    serializer_class = NewRightAnswerSerializer
     queryset = RightAsnwer.objects.all().order_by('id')
 
 
 # show single Model entry api/v1/answers
-class AnswerListAPIView(ListAPIView):
-    serializer_class = Answer
+class AnswerListAPIView(ListAPIView, CreateAPIView):
+    serializer_class = AnswerSerializer
+    queryset = Answer.objects.all().order_by('id')
+
+
+class AnswerCreateAPIView(CreateAPIView):
+    serializer_class = NewAnswerSerializer
     queryset = Answer.objects.all().order_by('id')
 
 
 # show single Model entry api/v1/answers/1
 class AnswerRetrieveUpdateView(RetrieveUpdateAPIView):
-    serializer_class = Answer
+    serializer_class = AnswerSerializer
     queryset = Answer.objects.all().order_by('id')
+
+
+class MailThemeSuccessListAPIView(ListAPIView):
+    serializer_class = ResultSerializer
+    queryset = MailThemeSuccess.objects.all().order_by('email')

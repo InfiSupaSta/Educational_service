@@ -25,6 +25,12 @@ class QuestionSerializer(serializers.ModelSerializer):
 class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
+        fields = 'id', 'answer'
+
+
+class NewAnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Answer
         fields = '__all__'
 
 
@@ -34,8 +40,13 @@ class RightAnswerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class NewRightAnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RightAsnwer
+        fields = '__all__'
+
+
 class ResultSerializer(serializers.ModelSerializer):
-    # class Meta:
-    #     model = Result
-    #     fields = '__all__'
-    pass
+    class Meta:
+        model = MailThemeSuccess
+        fields = '__all__'

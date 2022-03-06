@@ -29,7 +29,7 @@
 {% if queryset_len == 0 %}
         {% for question in all_questions %}
             {% for info in result_info %}
-    {% for item in right_answers %}
+                {% for item in right_answers %}
                     {% if question.id == info.question_id and item.question.id == question.id %}
                         <br>Вопрос: {{ question.question }}<br>
                         Правильно ли вы ответили? {% if info.is_correct %} Да {% else %} Нет {% endif %} <br><br>
@@ -46,7 +46,7 @@
                         Комментарий: {{ item.comment }}
                         <hr>
                     {% endif %}
-    {% endfor %}
+                {% endfor %}
             {% endfor %}
         {% endfor %}
 {% endif %}

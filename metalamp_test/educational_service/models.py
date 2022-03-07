@@ -6,7 +6,6 @@ from django.db import models
 from django.urls import reverse
 
 
-
 class UserProfileManager(BaseUserManager):
     def create_user(self, email, name, password=None):
         if not email:

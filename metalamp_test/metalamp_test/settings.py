@@ -15,7 +15,7 @@ from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+DJANGO_SETTINGS_MODULE = config('DJANGO_SETTINGS_MODULE', default='metalamp_test.settings')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'drf_yasg',
     'rest_framework',
     'educational_service.apps.EducationalServiceConfig',
     # 'authentication.apps.AuthenticationConfig',
@@ -89,7 +90,7 @@ DATABASES = {
         'NAME': config('DB_NAME', default='postgre'),
         'USER': config('DB_USER', default='postgre'),
         'PASSWORD': config('DB_PASSWORD', default='postgre'),
-        'HOST': '127.0.0.1',
+        'HOST': config('DB_HOST', default='127.0.0.1'),
         'PORT': '5432'
     }
 }
@@ -134,3 +135,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'educational_service.UserProfile'
+LOGOUT_REDIRECT_URL = '/'
+
+

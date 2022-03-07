@@ -1,6 +1,7 @@
 from django.contrib.auth import logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView
+from django.forms import model_to_dict
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
@@ -78,13 +79,33 @@ def get_staticstics(user_id, theme_id):
     success = round(
         (amount_of_correct_questions / amount_of_all_questions) * 100) if amount_of_all_questions != 0 else 0
 
+    # user_mail = UserProfile.objects.get(pk=user_id)
+    # try:
+    #     mail_theme_success_info = MailThemeSuccess.objects.get(email=user_mail, theme=theme_name)
+    #     success_percent = mail_theme_success_info.success_percent
+    #     info_to_show = f'''
+    #         На момент вашего прохождения теста по теме "{theme_name}" было
+    #     {round(100 / success_percent)} вопросов, правильно Вы ответили на {round(0.01 * success_percent * (100 / success_percent))}
+    #     Успешность выполнения: {success_percent}%!
+    #         '''
+    #     return info_to_show, success
+    # except Exception as exc:
+    #     print(exc)
+    # info_to_show = f'''
+    #             На момент вашего прохождения теста по теме "{theme_name}" было
+    #         0 вопросов, правильно Вы ответили на 0
+    #         Успешность выполнения: 100%!
+    #             '''
     info_to_show = f'''
-    Всего в теме под названием "{theme_name}" было {amount_of_all_questions} вопрос(а, ов), вы успешно ответили на 
+
+    Всего в теме под названием "{theme_name}" было {amount_of_all_questions} вопрос(а, ов), вы успешно ответили на
     {amount_of_correct_questions}.
     Успешность выполнения: {success}%!
     '''
 
     return info_to_show, success
+
+
 
 
 # def get_result_info_for_template():
@@ -110,6 +131,21 @@ Your success percent looks like:
 
 def theme_questions(request, pk):
     current_theme = Theme.objects.get(pk=pk)
+
+    if MailThemeSuccess.objects.filter(email=request.user.email, theme=Theme.objects.get(pk=pk)):
+        print('info about complition exists')
+        local_context_after_quiz_done = {
+            'title': 'Текущие вопросы',
+            'menu': menu,
+            'queryset_len': 0,
+            'question': get_staticstics(request.user.id, pk)[0],
+            'all_questions': Question.objects.filter(theme=pk),
+            'result_info': QuizComplitionInfo.objects.filter(bound_user=request.user.id, theme_id=pk),
+            'answers': Answer.objects.all(),
+            'right_answers': RightAsnwer.objects.all(),
+            'current_theme': current_theme,
+        }
+        return render(request, 'educational_service/test.html', context=local_context_after_quiz_done)
 
     if len(QuizComplitionInfo.objects.filter(bound_user__exact=request.user.id,
                                              theme__exact=Theme.objects.get(pk=pk))):
@@ -162,7 +198,7 @@ def theme_questions(request, pk):
                 print(f'Something going wrong, reason: {exc}')
 
             new_entry.save()
-            print('new entry added')
+            # print('new entry added')
 
         if not MailThemeSuccess.objects.filter(email=request.user.email, theme=current_theme,
                                                success_percent=get_staticstics(request.user.id, pk)[1])[
@@ -224,14 +260,14 @@ def theme_questions(request, pk):
     return render(request, 'educational_service/test.html', context=context)
 
 
-def theme_test(request):
-    # context = get_context()
-    # context['item'] = Theme.objects.get(id=theme_id)
-    # rev = reverse('test', kwargs={'theme_id': theme_id})
-    # return reverse(f'tests/{theme_id}')
-    return reverse(request.GET)
-    # return render(request, 'educational_service/test.html', context=context)
-    # return HttpResponse(f'{rev}')
+# def theme_test(request):
+#     # context = get_context()
+#     # context['item'] = Theme.objects.get(id=theme_id)
+#     # rev = reverse('test', kwargs={'theme_id': theme_id})
+#     # return reverse(f'tests/{theme_id}')
+#     return reverse(request.GET)
+#     # return render(request, 'educational_service/test.html', context=context)
+#     # return HttpResponse(f'{rev}')
 
 
 class UserRegistration(Mixin, CreateView):

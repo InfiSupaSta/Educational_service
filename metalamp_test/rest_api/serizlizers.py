@@ -12,7 +12,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class ThemeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Theme
-        # fields = ('title', 'description')
         fields = '__all__'
 
 
@@ -25,7 +24,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
-        fields = 'id', 'answer'
+        fields = '__all__'
 
 
 class NewAnswerSerializer(serializers.ModelSerializer):

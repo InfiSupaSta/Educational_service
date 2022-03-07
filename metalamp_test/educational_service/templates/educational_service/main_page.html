@@ -12,13 +12,13 @@
 {% endif %}
 {% if request.user.is_authenticated %}
 
-    {% for item in menu|slice:'-2'%}
+    {% for item in menu|slice:'2:' %}
 
     <a href="{% url item.url_name %}">{{item.title}}</a>
 
     {% endfor %}
 {% else %}
-    {% for item in menu %}
+    {% for item in menu|slice:'3' %}
 
     <a href="{% url item.url_name %}">{{item.title}}</a>
 

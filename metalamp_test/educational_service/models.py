@@ -7,12 +7,24 @@ from django.urls import reverse
 
 
 class UserProfileManager(BaseUserManager):
-    def create_user(self, email, name, password=None):
+    # def create_user(self, email, name, password=None):
+    #     if not email:
+    #         raise ValueError('User must have an email address')
+    #
+    #     email = self.normalize_email(email)
+    #     user = self.model(email=email, name=name)
+    #
+    #     user.set_password(password)
+    #     user.save(using=self._db)
+    #
+    #     return user
+
+    def create_user(self, email, password=None):
         if not email:
             raise ValueError('User must have an email address')
 
         email = self.normalize_email(email)
-        user = self.model(email=email, name=name)
+        user = self.model(email=email)
 
         user.set_password(password)
         user.save(using=self._db)
@@ -45,6 +57,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = 'Инфо о пользователе'
         verbose_name_plural = 'Инфо о пользователях'
+
 
 class Theme(models.Model):
     objects = models.Manager()

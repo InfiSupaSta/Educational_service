@@ -9,6 +9,7 @@ from educational_service.forms import UserRegistrationForm
 from educational_service.models import *
 from educational_service.utils import Mixin
 from educational_service.utils import menu
+from django.contrib import messages
 
 
 def get_context():
@@ -46,7 +47,6 @@ def theme_description(request, slug):
     return render(request, 'educational_service/theme_description.html', context=context)
 
 
-
 def get_staticstics(user_id, theme_id):
     amount_of_all_questions = len(QuizComplitionInfo.objects.filter(bound_user=user_id, theme_id=theme_id))
     amount_of_correct_questions = len(
@@ -64,7 +64,6 @@ def get_staticstics(user_id, theme_id):
     '''
 
     return info_to_show, success
-
 
 
 def send_mail_after_test_ending(theme, email, success_percent):
@@ -118,12 +117,12 @@ def theme_questions(request, pk):
         'answers': Answer.objects.all(),
         'right_answers': RightAsnwer.objects.all(),
         'current_theme': current_theme,
+
+        # 'messages': messages,
     }
 
     if queryset_len == 0:
         print('no more questions')
-
-
 
         # if not data about test complition
         if not MailThemeSuccess.objects.filter(email=request.user.email, theme=current_theme,
@@ -162,23 +161,31 @@ def theme_questions(request, pk):
         complition_info.theme = Theme.objects.get(pk=pk)
         complition_info.question = Question.objects.filter(theme=pk)[queryset_len - 1]
 
-
         current_answer = RightAsnwer.objects.filter(theme_id=complition_info.theme.id,
                                                     question_id=complition_info.question.id)
 
+        list_of_int_checks = [int(item) for item in request.POST.getlist('check')]
+
+        if list_of_int_checks == RightAsnwer.objects.get(theme_id=complition_info.theme.id,
+                                                         question_id=complition_info.question.id).list_od_answers:
+            messages.add_message(request, messages.INFO, 'Правильно!')
+
+        else:
+            messages.add_message(request, messages.INFO, 'Неправильно!')
 
         if [item for item in current_answer.values_list()[0] if isinstance(item, list)][0] == [int(item) for item in
                                                                                                request.POST.getlist(
                                                                                                    'check')]:
             complition_info.is_correct = True
 
-            complition_info.chosen_answers = [int(item) for item in request.POST.getlist('check')]
+            complition_info.chosen_answers = list_of_int_checks
         else:
-            complition_info.chosen_answers = [int(item) for item in request.POST.getlist('check')]
+            complition_info.chosen_answers = list_of_int_checks
 
         if len(QuizComplitionInfo.objects.all()) == 0:
             complition_info.save()
             return redirect('test', pk)
+
         elif not QuizComplitionInfo.objects.filter(bound_user__exact=complition_info.bound_user,
                                                    theme__exact=complition_info.theme.id,
                                                    question__exact=complition_info.question.id):
@@ -190,11 +197,7 @@ def theme_questions(request, pk):
             complition_info.save()
             return redirect('test', pk)
 
-
     return render(request, 'educational_service/test.html', context=context)
-
-
-
 
 
 class UserRegistration(Mixin, CreateView):

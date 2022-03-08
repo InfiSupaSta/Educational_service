@@ -11,10 +11,12 @@
 {% block content %}
 <hr>
 {% for item in object_list %}
-<br><br> <strong>{{ item }}</strong> <br><a href='{{ item.get_absolute_url_for_description }}'>
-    Почитать полезную информацию по теме! </a><br>
-<a href='{{ item.get_absolute_url }}'> Перейти к выполнению теста по теме! </a>
-<hr>
+    {% if item.is_published == True %}
+    <br><br> <strong>{{ item }}</strong> <br><a href='{{ item.get_absolute_url_for_description }}'>
+        Почитать полезную информацию по теме! </a><br>
+    <a href='{{ item.get_absolute_url }}'> Перейти к выполнению теста по теме! </a>
+    <hr>
+    {% endif %}
 {% endfor %}
 
 {% endblock content %}

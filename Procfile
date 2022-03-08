@@ -1,2 +1,2 @@
 release: python manage.py migrate
-web: gunicorn heroku_test.wsgi --log-file=-
+web: gunicorn metalamp_test.metalamp_test.wsgi --log-file=-

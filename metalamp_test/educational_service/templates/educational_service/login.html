@@ -8,14 +8,12 @@
 <body>
 
 {% block content %}
-    <br><br>
-
+    <br><br><hr>
+Введите данные для входа:
 <form method="POST">
     {% csrf_token %}
-
     {{ form.as_p }}
-<!--    {{ form.errors }}-->
-
+    {{ form.errors }}
 
     <button type="SUBMIT">Авторизация</button>
 </form>

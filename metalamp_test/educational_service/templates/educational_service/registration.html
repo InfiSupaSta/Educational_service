@@ -7,17 +7,18 @@
 </head>
 <body>
 {% block content %}
-    <br><br>
-
+    <br><br><hr>
+Введите данные для регистрации:
 <form method="POST" class="registration-form">
     {% csrf_token %}
 
-    {% for field in form %}
-    <p class = 'form-label'><label> {{ field.label }}</label> {{ field }} </p>
-    <div class = 'form-field-error'> {{ field.errors }} </div>
-    <hr>
-    {% endfor %}
-
+<!--    {% for field in form %}-->
+<!--    <p class = 'form-label'><label> {{ field.label }}</label> {{ field }} </p>-->
+<!--    <div class = 'form-field-error'> {{ field.errors }} </div>-->
+<!--    <hr>-->
+<!--    {% endfor %}-->
+    {{ form.as_p }}
+    {{ field.errors }}
     <button type="SUBMIT">Регистрация</button>
 </form>
 

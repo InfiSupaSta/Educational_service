@@ -180,14 +180,6 @@ class AnswerListAPIView(ListCreateAPIView):
     @swagger_auto_schema(
         operation_description="POST request to create new answer",
         operation_summary="Creating new answer",
-
-        # request_body=openapi.Schema(
-        #     type=openapi.TYPE_OBJECT,
-        #     # required=['name'],
-        #     properties={
-        #         'answer': openapi.Schema(type=openapi.TYPE_STRING),
-        #     },
-        # ),
         tags=['answers']
     )
     def post(self, request, *args, **kwargs):

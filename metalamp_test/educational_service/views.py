@@ -12,6 +12,46 @@ from educational_service.utils import menu
 from django.contrib import messages
 
 
+class Tests(Mixin, ListView):
+    model = Theme
+    template_name = 'educational_service/tests.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        datamixin_context = self.get_user_context()
+        context['title'] = 'Тесты'
+        return context | datamixin_context
+
+    def get_queryset(self):
+        return Theme.objects.all().order_by('id')
+
+
+class UserRegistration(Mixin, CreateView):
+    form_class = UserRegistrationForm
+    template_name = 'educational_service/registration.html'
+    success_url = reverse_lazy('login')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        datamixin_context = self.get_user_context(title='Регистрация')
+        return context | datamixin_context
+
+
+class UserLogin(Mixin, LoginView):
+    form_class = AuthenticationForm
+    template_name = 'educational_service/login.html'
+    success_url = reverse_lazy('home')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        datamixin_context = self.get_user_context(title='Авторизация')
+
+        return context | datamixin_context
+
+    def get_success_url(self):
+        return reverse_lazy('home')
+
+
 def get_context():
     context = {
         'menu': menu
@@ -23,21 +63,6 @@ def main_page(request):
     context = get_context()
     context['title'] = 'Главная страница'
     return render(request, 'educational_service/main_page.html', context=context)
-
-
-class Tests(Mixin, ListView):
-    model = Theme
-    template_name = 'educational_service/tests.html'
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        datamixin_context = self.get_user_context()
-        context['title'] = 'Тесты'
-        # context['']
-        return context | datamixin_context
-
-    def get_queryset(self):
-        return Theme.objects.all().order_by('id')
 
 
 def theme_description(request, slug):
@@ -117,8 +142,6 @@ def theme_questions(request, pk):
         'answers': Answer.objects.all(),
         'right_answers': RightAsnwer.objects.all(),
         'current_theme': current_theme,
-
-        # 'messages': messages,
     }
 
     if queryset_len == 0:
@@ -198,32 +221,6 @@ def theme_questions(request, pk):
             return redirect('test', pk)
 
     return render(request, 'educational_service/test.html', context=context)
-
-
-class UserRegistration(Mixin, CreateView):
-    form_class = UserRegistrationForm
-    template_name = 'educational_service/registration.html'
-    success_url = reverse_lazy('login')
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        datamixin_context = self.get_user_context(title='Регистрация')
-        return context | datamixin_context
-
-
-class UserLogin(Mixin, LoginView):
-    form_class = AuthenticationForm
-    template_name = 'educational_service/login.html'
-    success_url = reverse_lazy('home')
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        datamixin_context = self.get_user_context(title='Авторизация')
-
-        return context | datamixin_context
-
-    def get_success_url(self):
-        return reverse_lazy('home')
 
 
 def user_logout(request):

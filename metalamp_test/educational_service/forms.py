@@ -8,7 +8,6 @@ User = get_user_model()
 
 
 class UserRegistrationForm(UserCreationForm):
-    # username = forms.CharField(label='Ваш псевдоним')
     email = forms.EmailField(label='Адрес электронной почты')
     password1 = forms.CharField(widget=forms.PasswordInput(), label='Пароль')
     password2 = forms.CharField(widget=forms.PasswordInput(), label='Повторите пароль')

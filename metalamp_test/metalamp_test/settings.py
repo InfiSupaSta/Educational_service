@@ -88,9 +88,9 @@ WSGI_APPLICATION = 'metalamp_test.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': config('DB_NAME', default='postgre'),
-        'USER': config('DB_USER', default='postgre'),
-        'PASSWORD': config('DB_PASSWORD', default='postgre'),
+        'NAME': config('DB_NAME', default='postgres'),
+        'USER': config('DB_USER', default='postgres'),
+        'PASSWORD': config('DB_PASSWORD', default='postgres'),
         'HOST': config('DB_HOST', default='127.0.0.1'),
         'PORT': '5432'
     }

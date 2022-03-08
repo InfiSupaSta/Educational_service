@@ -1,5 +1,3 @@
-from django.test import TestCase
-from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from educational_service.models import *
@@ -272,3 +270,11 @@ class RightAnswerTests(APITestCase):
     def test__is_right_answer_endpoints_use_correct_url(self, pk=1):
         self.assertTrue(reverse('list_of_right_answers') == '/api/v1/right-answers')
         self.assertTrue(reverse('right_answers', kwargs={'pk': pk}) == f'/api/v1/right-answers/{pk}')
+
+
+class SerializersTests(APITestCase):
+    pass
+
+
+class PermissionsTests(APITestCase):
+    pass

@@ -1,6 +1,9 @@
+from django.test import RequestFactory
 from rest_framework import status
 from rest_framework.test import APITestCase
 from educational_service.models import *
+from rest_api.serizlizers import *
+from rest_framework.permissions import IsAdminUser
 
 
 # to run tests
@@ -272,9 +275,29 @@ class RightAnswerTests(APITestCase):
         self.assertTrue(reverse('right_answers', kwargs={'pk': pk}) == f'/api/v1/right-answers/{pk}')
 
 
-class SerializersTests(APITestCase):
-    pass
-
-
 class PermissionsTests(APITestCase):
-    pass
+
+    def setUp(self):
+        self.admin_user = UserProfile.objects.create(email='suemail', is_staff=True)
+        self.non_admin_user = UserProfile.objects.create(email='uemail')
+        self.factory = RequestFactory()
+
+    def test__admin_user_returns_true(self):
+        request = self.factory.delete('/')
+        request.user = self.admin_user
+        permission_check = IsAdminUser()
+        permission = permission_check.has_permission(request, None)
+        self.assertTrue(permission)
+
+
+class SerializersTests(APITestCase):
+
+    def test__theme_serializer_is_not_valid_if_any_required_field_is_missing(self):
+        data = {'title': 'theme', 'description': 'description', 'slug': '', 'is_published': True}
+        serializer = ThemeSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+
+    def test__theme_serializer_is_valid(self):
+        data = {'title': 'theme', 'description': 'description', 'slug': 'slug', 'is_published': True}
+        serializer = ThemeSerializer(data=data)
+        self.assertTrue(serializer.is_valid())

@@ -6,6 +6,7 @@ menu = [
     {'title': 'Выход с аккаунта', 'url_name': 'logout'},
 ]
 
+
 class Mixin:
 
     def get_user_context(self, **kwargs):

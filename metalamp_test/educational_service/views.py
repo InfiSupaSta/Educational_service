@@ -1,6 +1,7 @@
 from django.contrib.auth import logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView
+from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView
@@ -66,64 +67,67 @@ def main_page(request):
 
 
 def theme_description(request, slug):
-    description = get_object_or_404(Theme, slug=slug)
+    # description = get_object_or_404(Theme, slug=slug)
+    # context['theme'] = Theme.objects.get(slug=slug)
+
     context = get_context()
-    context['theme'] = Theme.objects.get(slug=slug)
+    context['theme'] = get_object_or_404(Theme, slug=slug)
     return render(request, 'educational_service/theme_description.html', context=context)
 
 
-def get_staticstics(user_id, theme_id):
-    amount_of_all_questions = len(QuizComplitionInfo.objects.filter(bound_user=user_id, theme_id=theme_id))
-    amount_of_correct_questions = len(
-        QuizComplitionInfo.objects.filter(bound_user=user_id, theme_id=theme_id, is_correct=True))
+def get_statistics(user_id, theme_id):
+    amount_of_all_questions = len(QuizComplitionInfo.objects.filter(bound_user=user_id,
+                                                                    theme_id=theme_id))
+
+    amount_of_correct_questions = len(QuizComplitionInfo.objects.filter(bound_user=user_id,
+                                                                        theme_id=theme_id,
+                                                                        is_correct=True))
     theme_name = Theme.objects.get(id=theme_id)
 
-    success = round(
-        (amount_of_correct_questions / amount_of_all_questions) * 100) if amount_of_all_questions != 0 else 0
+    success = round((amount_of_correct_questions / amount_of_all_questions) * 100) \
+        if amount_of_all_questions != 0 else 0
 
     info_to_show = f'''
-
     Всего в теме под названием "{theme_name}" было {amount_of_all_questions} вопрос(а, ов), вы успешно ответили на
     {amount_of_correct_questions}.
-    Успешность выполнения: {success}%!
+    Тест выполнен на {success}%!
     '''
 
     return info_to_show, success
 
 
-def send_mail_after_test_ending(theme, email, success_percent):
-    subject = f'\nInfo about test "{theme}" complition!'
+# def fake__send_mail_after_test_ending(theme, email, success_percent):
+#     subject = f'\nInfo about test "{theme}" completion!'
+#     recipient_list = [email]
+#     message = f'''
+# Thanks for the test completion!
+# Your success percent looks like:
+# {success_percent} %
+# '''
+#     from_email = "email_to_send_from@gmail.com"
+#     # send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+#     return f'{subject}{message}Sended from: {from_email}\n'
+
+
+def real__send_mail_after_test_ending(theme, email, success_percent):
+    subject = f'Info about test "{theme}" completion!'
     recipient_list = [email]
     message = f'''
-Thanks for the test complition!
-Your success percent looks like: 
-{success_percent} %
-'''
-    from_email = "email_to_send_from@gmail.com"
-    # send_mail(subject, message, from_email, recipient_list, fail_silently=False)
-    return f'{subject}{message}Sended from: {from_email}\n'
+        Thanks for the test completion!
+        Your success percent looks like: 
+        {success_percent} %
+    '''
+    from_email = "some_cool_email_here@gmail.com"
+
+    send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
 
 def theme_questions(request, pk):
     current_theme = Theme.objects.get(pk=pk)
 
-    if MailThemeSuccess.objects.filter(email=request.user.email, theme=Theme.objects.get(pk=pk)):
-        print('Called from views.theme_questions(). Email about test complition info already sent!')
-        local_context_after_quiz_done = {
-            'title': 'Текущие вопросы',
-            'menu': menu,
-            'queryset_len': 0,
-            'question': get_staticstics(request.user.id, pk)[0],
-            'all_questions': Question.objects.filter(theme=pk),
-            'result_info': QuizComplitionInfo.objects.filter(bound_user=request.user.id, theme_id=pk),
-            'answers': Answer.objects.all(),
-            'right_answers': RightAsnwer.objects.all(),
-            'current_theme': current_theme,
-        }
-        return render(request, 'educational_service/test.html', context=local_context_after_quiz_done)
-
     if len(QuizComplitionInfo.objects.filter(bound_user__exact=request.user.id,
                                              theme__exact=Theme.objects.get(pk=pk))):
+
         quiz_len = len(QuizComplitionInfo.objects.filter(bound_user__exact=request.user.id,
                                                          theme__exact=Theme.objects.get(pk=pk)))
     else:
@@ -135,89 +139,120 @@ def theme_questions(request, pk):
         'title': 'Текущие вопросы',
         'menu': menu,
         'queryset_len': queryset_len,
-        'question': Question.objects.filter(theme=pk)[queryset_len - 1] if queryset_len > 0 else get_staticstics(
+        'question': Question.objects.filter(theme=pk)[queryset_len - 1] if queryset_len > 0 else get_statistics(
             request.user.id, pk)[0],
         'all_questions': Question.objects.filter(theme=pk),
-        'result_info': QuizComplitionInfo.objects.filter(bound_user=request.user.id, theme_id=pk),
+        'result_info': QuizComplitionInfo.objects.filter(bound_user=request.user.id,
+                                                         theme_id=pk),
         'answers': Answer.objects.all(),
         'right_answers': RightAsnwer.objects.all(),
         'current_theme': current_theme,
     }
 
+    # if no more questions in QUIZ list
     if queryset_len == 0:
-        print('no more questions')
+        print('its 0!')
+        # if not saved data about test completion
+        if not MailThemeSuccess.objects.filter(email=request.user.email,
+                                               theme=current_theme,
+                                               success_percent=get_statistics(request.user.id, pk)[1]):
 
-        # if not data about test complition
-        if not MailThemeSuccess.objects.filter(email=request.user.email, theme=current_theme,
-                                               success_percent=get_staticstics(request.user.id, pk)[1]):
             new_entry = MailThemeSuccess()
             new_entry.email = request.user.email
             new_entry.theme = current_theme
-            new_entry.success_percent = get_staticstics(request.user.id, pk)[1]
+            new_entry.success_percent = get_statistics(request.user.id, pk)[1]
 
             try:
                 new_entry.is_mail_sended = True
 
                 # replace it for real mail sending function
-                print(send_mail_after_test_ending(current_theme, request.user.email, get_staticstics(
-                    request.user.id, pk)[1]))
+                # print(fake__send_mail_after_test_ending(current_theme,
+                #                                         request.user.email,
+                #                                         get_statistics(request.user.id, pk)[1]))
+
+                real__send_mail_after_test_ending(current_theme,
+                                                  request.user.email,
+                                                  get_statistics(request.user.id, pk)[1])
             except Exception as exc:
                 print(f'Something going wrong, reason: {exc}')
 
             new_entry.save()
             # print('new entry added')
 
-        if not MailThemeSuccess.objects.filter(email=request.user.email, theme=current_theme,
-                                               success_percent=get_staticstics(request.user.id, pk)[1])[
-            0].is_mail_sended:
+        # check if email not sent for any reason after QUIZ complition
+        if MailThemeSuccess.objects.filter(email=request.user.email,
+                                           theme=current_theme,
+                                           success_percent=get_statistics(request.user.id,
+                                                                          pk)[1])[0].is_mail_sended is False:
             print(
-                '''\nEntry about test complition exists, but mail does not sended, 
+                '''\nEntry about test completion exists, but mail does not sent for any reason, 
                 fix it! ( add another try to send mail here and change bounded_entry.is_mail_sended to True\n''')
 
+        # check if mail already sent after QUIZ done
+        # if MailThemeSuccess.objects.filter(email=request.user.email,
+        #                                    theme=Theme.objects.get(pk=pk)):
+        #     # print('Called from views.theme_questions(). Email about test completion info already sent!')
+        #     local_context_after_quiz_done = {
+        #         'title': 'Текущие вопросы',
+        #         'menu': menu,
+        #         'queryset_len': 0,
+        #         'question': get_statistics(request.user.id, pk)[0],
+        #         'all_questions': Question.objects.filter(theme=pk),
+        #         'result_info': QuizComplitionInfo.objects.filter(bound_user=request.user.id,
+        #                                                          theme_id=pk),
+        #         'answers': Answer.objects.all(),
+        #         'right_answers': RightAsnwer.objects.all(),
+        #         'current_theme': current_theme,
+        #     }
+        #     return render(request,
+        #                   'educational_service/test.html',
+        #                   context=local_context_after_quiz_done)
+
+    #  block of code to serve answers
     if request.method == "POST":
 
+        #  if user not choose at least one answer just redirect him to the same page with the same question
         if len(request.POST.getlist('check')) == 0:
             return redirect('test', pk)
 
-        complition_info = QuizComplitionInfo()
-        complition_info.bound_user = request.user.id
-        complition_info.theme = Theme.objects.get(pk=pk)
-        complition_info.question = Question.objects.filter(theme=pk)[queryset_len - 1]
-
-        current_answer = RightAsnwer.objects.filter(theme_id=complition_info.theme.id,
-                                                    question_id=complition_info.question.id)
+        completion_info = QuizComplitionInfo()
+        completion_info.bound_user = request.user.id
+        completion_info.theme = Theme.objects.get(pk=pk)
+        completion_info.question = Question.objects.filter(theme=pk)[queryset_len - 1]
 
         list_of_int_checks = [int(item) for item in request.POST.getlist('check')]
 
-        if list_of_int_checks == RightAsnwer.objects.get(theme_id=complition_info.theme.id,
-                                                         question_id=complition_info.question.id).list_od_answers:
+        # block of code to indicate about correct or not was the answer
+        if list_of_int_checks == RightAsnwer.objects.get(theme_id=completion_info.theme.id,
+                                                         question_id=completion_info.question.id).list_od_answers:
             messages.add_message(request, messages.INFO, 'Правильно!')
-
         else:
             messages.add_message(request, messages.INFO, 'Неправильно!')
 
+        # searching for list of right answers according to current answer
+        current_answer = RightAsnwer.objects.filter(theme_id=completion_info.theme.id,
+                                                    question_id=completion_info.question.id)
         if [item for item in current_answer.values_list()[0] if isinstance(item, list)][0] == [int(item) for item in
                                                                                                request.POST.getlist(
                                                                                                    'check')]:
-            complition_info.is_correct = True
-
-            complition_info.chosen_answers = list_of_int_checks
+            # mark answer as correct
+            completion_info.is_correct = True
+            completion_info.chosen_answers = list_of_int_checks
         else:
-            complition_info.chosen_answers = list_of_int_checks
+            completion_info.chosen_answers = list_of_int_checks
 
-        if len(QuizComplitionInfo.objects.all()) == 0:
-            complition_info.save()
-            return redirect('test', pk)
+        # if len(QuizComplitionInfo.objects.all()) == 0:
+        #     completion_info.save()
+        #     return redirect('test', pk)
 
-        elif not QuizComplitionInfo.objects.filter(bound_user__exact=complition_info.bound_user,
-                                                   theme__exact=complition_info.theme.id,
-                                                   question__exact=complition_info.question.id):
-
-            complition_info.save()
+        if not QuizComplitionInfo.objects.filter(bound_user__exact=completion_info.bound_user,
+                                                 theme__exact=completion_info.theme.id,
+                                                 question__exact=completion_info.question.id):
+            completion_info.save()
             return redirect('test', pk)
         else:
             print('Entry exists')
-            complition_info.save()
+            # completion_info.save()
             return redirect('test', pk)
 
     return render(request, 'educational_service/test.html', context=context)

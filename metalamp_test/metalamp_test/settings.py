@@ -11,20 +11,26 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
-from decouple import config
 import os
+
+from configparser import RawConfigParser
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-DJANGO_SETTINGS_MODULE = config('DJANGO_SETTINGS_MODULE', default='metalamp_test.settings')
+
+config = RawConfigParser()
+config.read('local_settings.ini')
+
+
+DJANGO_SETTINGS_MODULE = config.get('other', 'DJANGO_SETTINGS_MODULE')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='a_really_secret_thing')
+SECRET_KEY = config.get('other', 'SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config.get('other', 'DEBUG')
 
 ALLOWED_HOSTS = []
 
@@ -88,10 +94,10 @@ WSGI_APPLICATION = 'metalamp_test.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': config('DB_NAME', default='db'),
-        'USER': config('DB_USER', default='postgres'),
-        'PASSWORD': config('DB_PASSWORD', default='postgres'),
-        'HOST': config('DB_HOST', default='localhost'),
+        'NAME': config.get('db', 'DB_NAME'),
+        'USER': config.get('db', 'DB_USER'),
+        'PASSWORD': config.get('db', 'DB_PASSWORD'),
+        'HOST': config.get('db', 'DB_HOST'),
         'PORT': '5432'
     }
 }
@@ -128,7 +134,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'UTC'
 
@@ -152,3 +158,11 @@ AUTH_USER_MODEL = 'educational_service.UserProfile'
 LOGOUT_REDIRECT_URL = '/'
 
 
+EMAIL_HOST_USER = config.get('mail', 'EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config.get('mail', 'EMAIL_HOST_PASSWORD')
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

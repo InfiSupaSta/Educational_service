@@ -52,3 +52,20 @@ drf-yasg.
 - после получения id в нижней форме опять выбираем тему для которой создавался вопрос, указываем id ПРАВИЛЬНЫХ ответов
   для вопроса, пишем комментарий и сохраняем - после этого прикрепленный к теме вопрос с ответами и правильным ответом
   создан. При добавлении вопроса в уже опубликованный тест смотри пункт 1.
+
+В каталоге с manage.py создать файл local_settings.ini и добавить свои данные:
+
+    [other]
+    DEBUG=True
+    SECRET_KEY=real_secret_thing
+    DJANGO_SETTINGS_MODULE=
+    
+    [mail]
+    EMAIL_HOST_USER=
+    EMAIL_HOST_PASSWORD=
+    
+    [db]
+    DB_NAME=
+    DB_USER=
+    DB_PASSWORD=
+    DB_HOST=

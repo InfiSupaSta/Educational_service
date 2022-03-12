@@ -7,8 +7,7 @@
 <body>
 {% block menu %}
 {% if user.is_authenticated%}
-<div align="center">В данный момент вы находитесь на аккаунте с почтовым ящиком <strong>{{ user.email
-    }}</strong>!<br><br></div>
+<div align="center">В данный момент вы находитесь на аккаунте с почтовым ящиком <strong>{{user.email}}</strong>!<br><br></div>
 
 {% endif %}
 {% if request.user.is_authenticated %}

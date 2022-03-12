@@ -289,6 +289,18 @@ class PermissionsTests(APITestCase):
         permission = permission_check.has_permission(request, None)
         self.assertTrue(permission)
 
+    def test__access_to_users_list_by_non_admin_user(self):
+        url = reverse('user_create')
+        login = self.client.login()
+        response = self.client.get(url, format='json')
+        self.assertFalse(login)
+        self.assertEqual(response.status_code, 403)
+
+    def test__access_to_themes_page_for_any(self):
+        url = reverse('list_of_themes')
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+
 
 class SerializersTests(APITestCase):
 

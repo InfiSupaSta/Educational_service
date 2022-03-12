@@ -20,8 +20,8 @@ class UserProfileManager(BaseUserManager):
 
         return user
 
-    def create_superuser(self, email, name, password):
-        user = self.create_user(email, name, password)
+    def create_superuser(self, email, password=None):
+        user = self.create_user(email, password)
         user.is_superuser = True
         user.is_staff = True
 
@@ -38,7 +38,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name']
+    REQUIRED_FIELDS = []
 
     def __str__(self):
         return f'{self.email}'
@@ -53,7 +53,7 @@ class Theme(models.Model):
     title = models.CharField('Тема', max_length=200)
     description = models.TextField('Описание')
     slug = models.SlugField(max_length=100, unique=True, db_index=True)
-    is_published = models.BooleanField(default=False)
+    is_published = models.BooleanField('Опубликована ли тема?', default=False)
 
     def __str__(self):
         return f'{self.title}'
@@ -125,9 +125,9 @@ class RightAsnwer(models.Model):  # new model
 
 class MailThemeSuccess(models.Model):
     objects = models.Manager()
-    email = models.CharField(max_length=100)
-    theme = models.CharField(max_length=150)
-    success_percent = models.IntegerField()
+    email = models.CharField('Почта', max_length=100)
+    theme = models.CharField('Тема', max_length=150)
+    success_percent = models.IntegerField('Процент выполнения')
     is_mail_sended = models.BooleanField(default=False)
 
     def __str__(self):

@@ -13,6 +13,7 @@ from educational_service.utils import menu
 from django.contrib import messages
 
 
+
 class Tests(Mixin, ListView):
     model = Theme
     template_name = 'educational_service/tests.html'
@@ -20,7 +21,7 @@ class Tests(Mixin, ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         datamixin_context = self.get_user_context()
-        context['title'] = 'Тесты'
+        context['title'] = 'Тематические выкладки и тесты'
         return context | datamixin_context
 
     def get_queryset(self):
@@ -67,8 +68,6 @@ def main_page(request):
 
 
 def theme_description(request, slug):
-    # description = get_object_or_404(Theme, slug=slug)
-    # context['theme'] = Theme.objects.get(slug=slug)
 
     context = get_context()
     context['theme'] = get_object_or_404(Theme, slug=slug)
@@ -151,19 +150,19 @@ def theme_questions(request, pk):
 
     # if no more questions in QUIZ list
     if queryset_len == 0:
-        print('its 0!')
+
         # if not saved data about test completion
         if not MailThemeSuccess.objects.filter(email=request.user.email,
                                                theme=current_theme,
                                                success_percent=get_statistics(request.user.id, pk)[1]):
 
-            new_entry = MailThemeSuccess()
-            new_entry.email = request.user.email
-            new_entry.theme = current_theme
-            new_entry.success_percent = get_statistics(request.user.id, pk)[1]
+            info_about_test_completion = MailThemeSuccess()
+            info_about_test_completion.email = request.user.email
+            info_about_test_completion.theme = current_theme
+            info_about_test_completion.success_percent = get_statistics(request.user.id, pk)[1]
 
             try:
-                new_entry.is_mail_sended = True
+                info_about_test_completion.is_mail_sended = True
 
                 # replace it for real mail sending function
                 # print(fake__send_mail_after_test_ending(current_theme,
@@ -176,8 +175,7 @@ def theme_questions(request, pk):
             except Exception as exc:
                 print(f'Something going wrong, reason: {exc}')
 
-            new_entry.save()
-            # print('new entry added')
+            info_about_test_completion.save()
 
         # check if email not sent for any reason after QUIZ complition
         if MailThemeSuccess.objects.filter(email=request.user.email,
@@ -185,33 +183,13 @@ def theme_questions(request, pk):
                                            success_percent=get_statistics(request.user.id,
                                                                           pk)[1])[0].is_mail_sended is False:
             print(
-                '''\nEntry about test completion exists, but mail does not sent for any reason, 
+                f'''\nEntry about test completion exists, but mail does not sent for any reason, 
                 fix it! ( add another try to send mail here and change bounded_entry.is_mail_sended to True\n''')
 
-        # check if mail already sent after QUIZ done
-        # if MailThemeSuccess.objects.filter(email=request.user.email,
-        #                                    theme=Theme.objects.get(pk=pk)):
-        #     # print('Called from views.theme_questions(). Email about test completion info already sent!')
-        #     local_context_after_quiz_done = {
-        #         'title': 'Текущие вопросы',
-        #         'menu': menu,
-        #         'queryset_len': 0,
-        #         'question': get_statistics(request.user.id, pk)[0],
-        #         'all_questions': Question.objects.filter(theme=pk),
-        #         'result_info': QuizComplitionInfo.objects.filter(bound_user=request.user.id,
-        #                                                          theme_id=pk),
-        #         'answers': Answer.objects.all(),
-        #         'right_answers': RightAsnwer.objects.all(),
-        #         'current_theme': current_theme,
-        #     }
-        #     return render(request,
-        #                   'educational_service/test.html',
-        #                   context=local_context_after_quiz_done)
-
-    #  block of code to serve answers
+    #  block of code to serve the answers
     if request.method == "POST":
 
-        #  if user not choose at least one answer just redirect him to the same page with the same question
+        #  if user does not choose at least one answer just redirect him to the same page with the same question
         if len(request.POST.getlist('check')) == 0:
             return redirect('test', pk)
 
@@ -230,6 +208,7 @@ def theme_questions(request, pk):
             messages.add_message(request, messages.INFO, 'Неправильно!')
 
         # searching for list of right answers according to current answer
+        # (and yes, storing any type of lists or arrays in the field goes against first normal form)
         current_answer = RightAsnwer.objects.filter(theme_id=completion_info.theme.id,
                                                     question_id=completion_info.question.id)
         if [item for item in current_answer.values_list()[0] if isinstance(item, list)][0] == [int(item) for item in
@@ -241,18 +220,16 @@ def theme_questions(request, pk):
         else:
             completion_info.chosen_answers = list_of_int_checks
 
-        # if len(QuizComplitionInfo.objects.all()) == 0:
-        #     completion_info.save()
-        #     return redirect('test', pk)
-
+        # just another level of checks before saving
         if not QuizComplitionInfo.objects.filter(bound_user__exact=completion_info.bound_user,
                                                  theme__exact=completion_info.theme.id,
                                                  question__exact=completion_info.question.id):
             completion_info.save()
             return redirect('test', pk)
+
+        # if for some reason that entry exists(which must not)
         else:
-            print('Entry exists')
-            # completion_info.save()
+            print('Somehow entry about question exists')
             return redirect('test', pk)
 
     return render(request, 'educational_service/test.html', context=context)

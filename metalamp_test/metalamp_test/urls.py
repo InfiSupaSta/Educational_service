@@ -21,24 +21,23 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
+
 urlpatterns = [
-    path('admin/', admin.site.urls, name='admin'),
     path('', main_page, name='home'),
-    # path('tests/', tests, name='tests'),
+
     path('themes-with-tests/', Tests.as_view(), name='tests'),
     path('theme-info/<slug:slug>', theme_description, name='theme_desc'),
     path('tests/<int:pk>', theme_questions, name='test'),
-    # path('tests/<int:pk>', ThemeQuestions.as_view(), name='test'),
 
-    # path('api/v1', main_page, name='api'),
+    path('admin/', admin.site.urls, name='admin'),
     path('registration', UserRegistration.as_view(), name='register'),
     path('login', UserLogin.as_view(), name='login'),
     path('logout', user_logout, name='logout'),
-    # path('hello/2', MainPage.as_view(), name='main_page2')
 
     path('api/v1/', include('rest_api.urls')),
 
 ]
+
 
 schema_view = get_schema_view(
     openapi.Info(

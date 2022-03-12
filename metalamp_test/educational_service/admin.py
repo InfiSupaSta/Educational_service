@@ -30,6 +30,7 @@ class AdminRightQuestionExtraField(admin.ModelAdmin):
 
 
 class AdminThemeSlug(admin.ModelAdmin):
+    list_display = ('title', 'is_published')
     prepopulated_fields = {'slug': ('title',)}
 
 
